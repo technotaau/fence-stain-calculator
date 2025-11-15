@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fence Stain Calculator - Quick Estimate & Brand Comparison</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50; /* Ninja brand dark blue */
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .calculator-body {
+            padding: 40px;
+        }
+
+        /* Project Type Toggle */
+        .project-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #e74c3c; /* Ninja brand red */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .unit-label {
+            color: #666;
+            font-weight: 500;
+            min-width: 30px;
+        }
+
+        select.input-field {
+            cursor: pointer;
+            background: white;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+
+        /* Two Column Layout */
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Calculate Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            background: #e74c3c; /* Ninja brand red */
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+
+        .calculate-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Results Section */
+        .results-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #f8f9fa;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Quick Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .summary-unit {
+            color: #666;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        /* Brand Comparison Table */
+        .comparison-section {
+            margin-top: 30px;
+        }
+
+        .comparison-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .brand-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 0 0 1px #e9ecef;
+        }
+
+        .brand-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .brand-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 14px;
+        }
+
+        .brand-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .brand-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .brand-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .brand-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-recommended {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-value {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-popular {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .price-highlight {
+            font-weight: 600;
+            font-size: 16px;
+            color: #28a745;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .calculator-body {
+                padding: 20px;
+            }
+            
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .brand-table {
+                font-size: 12px;
+            }
+            
+            .brand-table th,
+            .brand-table td {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Info Tooltips */
+        .info-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Price Range Bar */
+        .price-range-visual {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .price-range-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .price-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .price-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .price-bar-label {
+            min-width: 100px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .price-bar-track {
+            flex: 1;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .price-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #ffc107);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">NINJA FENCE STAINING</div>
+            <h1>Fence Stain Calculator</h1>
+            <p>Get instant estimates and compare top brands in seconds</p>
+        </div>
+
+        <div class="calculator-body">
+            <!-- Project Type Toggle -->
+            <div class="project-toggle">
+                <button class="toggle-btn active" onclick="setProjectType('fence')">Fence</button>
+                <button class="toggle-btn" onclick="setProjectType('deck')">Deck</button>
+            </div>
+
+            <!-- Fence Inputs -->
+            <div id="fence-inputs">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label class="input-label">Fence Length</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="input-field" id="fence-length" value="150" placeholder="150">
+                            <span class="unit-label">ft</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Fence Height</label>
+                        <select class="input-field" id="fence-height">
+                            <option value="4">4 feet</option>
+                            <option value="5">5 feet</option>
+                            <option value="6" selected>6 feet</option>
+                            <option value="7">7 feet</option>
+                            <option value="8">8 feet</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label class="input-label">Fence Style</label>
+                        <select class="input-field" id="fence-style">
+                            <option value="1.0">Standard Privacy</option>
+                            <option value="1.15">Board-on-Board</option>
+                            <option value="1.1">Shadowbox</option>
+                            <option value="0.85">Picket</option>
+                            <option value="0.6">Split Rail</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Sides to Stain</label>
+                        <select class="input-field" id="sides">
+                            <option value="1">One Side</option>
+                            <option value="2" selected>Both Sides</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deck Inputs -->
+            <div id="deck-inputs" style="display: none;">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label class="input-label">Deck Area</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="input-field" id="deck-area" value="300" placeholder="300">
+                            <span class="unit-label">sq ft</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Include Railings?</label>
+                        <select class="input-field" id="railings">
+                            <option value="0">No Railings</option>
+                            <option value="100">Small (+ 100 sq ft)</option>
+                            <option value="200" selected>Medium (+ 200 sq ft)</option>
+                            <option value="300">Large (+ 300 sq ft)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Common Inputs -->
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">Stain Type</label>
+                    <select class="input-field" id="stain-type">
+                        <option value="oil" selected>Oil-Based (Better Protection)</option>
+                        <option value="water">Water-Based (Fast Drying)</option>
+                    </select>
+                    <div class="info-text">Oil-based lasts longer, water-based dries faster</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Wood Condition</label>
+                    <select class="input-field" id="condition">
+                        <option value="0.8">New Wood (< 1 year)</option>
+                        <option value="1.0" selected>Good (1-3 years)</option>
+                        <option value="1.2">Weathered (3-5 years)</option>
+                        <option value="1.3">Very Weathered (5+ years)</option>
+                    </select>
+                    <div class="info-text">Older wood absorbs more stain</div>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">Number of Coats</label>
+                    <select class="input-field" id="coats">
+                        <option value="1">1 Coat (Touch-up)</option>
+                        <option value="1.6" selected>2 Coats (Standard)</option>
+                        <option value="2">2 Heavy Coats</option>
+                    </select>
+                    <div class="info-text">2 coats recommended for best protection</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Application Method</label>
+                    <select class="input-field" id="application">
+                        <option value="1.0" selected>Brush/Roller (Standard)</option>
+                        <option value="1.1">Spray (Uses 10% more)</option>
+                        <option value="1.05">Spray & Back-brush</option>
+                    </select>
+                    <div class="info-text">Spraying uses more product but is faster</div>
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculate()">
+                Calculate Stain Needed →
+            </button>
+
+            <!-- Results Section -->
+            <div id="results" class="results-section">
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-label">Square Footage</div>
+                        <div class="summary-value" id="total-sqft">0<span class="summary-unit">sq ft</span></div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Gallons Needed</div>
+                        <div class="summary-value" id="gallons-needed">0<span class="summary-unit">gal</span></div>
+                    </div>
+                    <div class="summary-card" style="background: #e74c3c; color: white;">
+                        <div class="summary-label" style="color: rgba(255,255,255,0.9);">Recommended Purchase</div>
+                        <div class="summary-value" style="color: white;" id="purchase-amount">0<span class="summary-unit" style="color: rgba(255,255,255,0.9);">gallons</span></div>
+                    </div>
+                </div>
+
+                <!-- Brand Comparison -->
+                <div class="comparison-section">
+                    <h2 class="comparison-title">Brand Comparison & Pricing</h2>
+                    
+                    <table class="brand-table">
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Coverage</th>
+                                <th>Gallons</th>
+                                <th>Price/Gal</th>
+                                <th>Total Cost</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="brand-tbody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+
+                    <!-- Visual Price Comparison -->
+                    <div class="price-range-visual">
+                        <div class="price-range-title">Price Comparison</div>
+                        <div class="price-bars" id="price-bars">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Services Section -->
+                <div style="margin-top: 40px; padding: 30px; background: #f8f9fa; border-radius: 12px;">
+                    <h2 style="color: #2c3e50; margin-bottom: 20px; font-size: 24px;">Professional Installation by Ninja Fence Staining</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div style="padding: 20px; background: white; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                            <h3 style="color: #2c3e50; margin-bottom: 10px; font-size: 16px;">5-Year Protection Warranty</h3>
+                            <p style="color: #666; font-size: 14px; line-height: 1.6;">We stand behind our work with Houston's best warranty. Your fence stays protected against weather, UV damage, and rot.</p>
+                        </div>
+                        <div style="padding: 20px; background: white; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                            <h3 style="color: #2c3e50; margin-bottom: 10px; font-size: 16px;">Same-Week Service</h3>
+                            <p style="color: #666; font-size: 14px; line-height: 1.6;">Fast, professional service when you need it. Most projects completed in 1-2 days, weather permitting.</p>
+                        </div>
+                        <div style="padding: 20px; background: white; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                            <h3 style="color: #2c3e50; margin-bottom: 10px; font-size: 16px;">HOA Compliance Expert</h3>
+                            <p style="color: #666; font-size: 14px; line-height: 1.6;">We know the requirements for Towne Lake, Bridgeland, and all major Houston neighborhoods.</p>
+                        </div>
+                    </div>
+
+                    <!-- Project Timeline -->
+                    <div style="padding: 20px; background: white; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">Typical Project Timeline</h3>
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="background: #e74c3c; color: white; padding: 5px 12px; border-radius: 5px; margin-right: 15px; font-weight: 600; min-width: 60px;">Day 1</div>
+                            <span style="color: #666;">Pressure washing & preparation (2-3 hours)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                            <div style="background: #e74c3c; color: white; padding: 5px 12px; border-radius: 5px; margin-right: 15px; font-weight: 600; min-width: 60px;">Day 2</div>
+                            <span style="color: #666;">Stain application - First & second coat (3-4 hours)</span>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <div style="background: #e74c3c; color: white; padding: 5px 12px; border-radius: 5px; margin-right: 15px; font-weight: 600; min-width: 60px;">Day 3</div>
+                            <span style="color: #666;">Final inspection & touch-ups (1 hour)</span>
+                        </div>
+                    </div>
+
+                    <!-- Important Notes -->
+                    <div style="padding: 20px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #856404; margin-bottom: 10px;">Important Notes:</h4>
+                        <ul style="color: #856404; font-size: 14px; margin-left: 20px; line-height: 1.8;">
+                            <li>Prices shown are for materials only. Professional installation starts at $3.50 per linear foot</li>
+                            <li>All estimates include 10% extra material for touch-ups and future maintenance</li>
+                            <li>Weather conditions may affect coverage rates and drying times</li>
+                            <li>Two coats recommended for optimal protection (included in our service)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Why Choose Professional -->
+                    <div style="padding: 20px; background: white; border-radius: 8px; margin-bottom: 30px;">
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">DIY vs Professional Installation</h3>
+                        <table style="width: 100%; font-size: 14px;">
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>DIY Cost:</strong></td>
+                                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;" id="diy-cost">Materials only</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>Professional Cost:</strong></td>
+                                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;" id="pro-cost">Materials + Labor</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;"><strong>Time Required:</strong></td>
+                                <td style="padding: 10px; border-bottom: 1px solid #e9ecef;">DIY: 3-4 days | Professional: 1-2 days</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px;"><strong>Warranty:</strong></td>
+                                <td style="padding: 10px;">DIY: None | Professional: 5 Years</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- CTA Section -->
+                    <div style="text-align: center; padding: 30px; background: #2c3e50; border-radius: 8px; color: white;">
+                        <h2 style="margin-bottom: 10px;">Ready to Get Started?</h2>
+                        <p style="margin-bottom: 20px; opacity: 0.9;">Get your FREE professional estimate in minutes</p>
+                        
+                        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                            <a href="tel:8322586164" style="display: inline-block; padding: 15px 30px; background: #e74c3c; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
+                                Call Now: (832) 258-6164
+                            </a>
+                            <a href="https://ninjafencestaining.com/contact/" style="display: inline-block; padding: 15px 30px; background: white; color: #2c3e50; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">
+                                Get Free Estimate Online
+                            </a>
+                        </div>
+                        
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                            <p style="font-size: 14px; opacity: 0.8;">Serving: Houston • Cypress • The Woodlands • Katy • Spring • Bellaire</p>
+                            <p style="font-size: 14px; opacity: 0.8; margin-top: 5px;">Open: Mon-Sun 7:00 AM - 7:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let projectType = 'fence';
+
+        // Accurate brand databases with industry-standard coverage rates
+        const brandDatabase = {
+            oil: [
+                {
+                    name: 'Wood Defender',
+                    coverage: 150,  // Industry standard for oil-based
+                    price: 45,
+                    rating: 5,
+                    availability: 'Contractor',
+                    recommended: true,
+                    pros: '5-year warranty, nano-particles'
+                },
+                {
+                    name: 'Ready Seal',
+                    coverage: 150,  // Verified from manufacturer
+                    price: 52,
+                    rating: 4,
+                    availability: 'Home Depot',
+                    popular: true,
+                    pros: 'No back-brushing needed'
+                },
+                {
+                    name: 'TWP 100 Series',
+                    coverage: 125,  // First coat coverage per manufacturer
+                    price: 68,
+                    rating: 5,
+                    availability: 'Online',
+                    pros: 'EPA registered, professional grade'
+                },
+                {
+                    name: 'Cabot Australian Timber',
+                    coverage: 150,  // Standard coverage
+                    price: 42,
+                    rating: 3,
+                    availability: 'Lowes',
+                    value: true,
+                    pros: 'Budget friendly option'
+                },
+                {
+                    name: 'Armstrong Clark',
+                    coverage: 175,  // Higher coverage per manufacturer
+                    price: 55,
+                    rating: 4,
+                    availability: 'Online',
+                    pros: 'Hardwood specialist'
+                },
+                {
+                    name: 'DEFY Extreme',
+                    coverage: 150,  // Standard oil-based coverage
+                    price: 59,
+                    rating: 5,
+                    availability: 'Online',
+                    pros: 'Synthetic resin formula'
+                }
+            ],
+            water: [
+                {
+                    name: 'Behr Premium',
+                    coverage: 250,  // Water-based covers more
+                    price: 35,
+                    rating: 3,
+                    availability: 'Home Depot',
+                    value: true,
+                    pros: 'Lowest price, fast drying'
+                },
+                {
+                    name: 'Olympic Elite',
+                    coverage: 200,  // Manufacturer spec
+                    price: 40,
+                    rating: 3,
+                    availability: 'Lowes',
+                    popular: true,
+                    pros: 'Widely available'
+                },
+                {
+                    name: 'Sherwin SuperDeck',
+                    coverage: 225,  // Professional grade coverage
+                    price: 48,
+                    rating: 4,
+                    availability: 'Sherwin Williams',
+                    recommended: true,
+                    pros: 'Professional grade, color retention'
+                },
+                {
+                    name: 'Benjamin Moore Arborcoat',
+                    coverage: 175,  // Premium water-based
+                    price: 55,
+                    rating: 4,
+                    availability: 'BM Dealers',
+                    pros: 'Premium quality, fade resistant'
+                },
+                {
+                    name: 'Flood Pro Series',
+                    coverage: 200,  // Standard water-based
+                    price: 45,
+                    rating: 3,
+                    availability: 'PPG Dealers',
+                    pros: 'Contractor grade'
+                },
+                {
+                    name: 'Thompson WaterSeal',
+                    coverage: 200,  // Basic protection
+                    price: 28,
+                    rating: 2,
+                    availability: 'Home Depot',
+                    value: true,
+                    pros: 'Very affordable'
+                }
+            ]
+        };
+
+        function setProjectType(type) {
+            projectType = type;
+            
+            // Update toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide inputs
+            if (type === 'fence') {
+                document.getElementById('fence-inputs').style.display = 'block';
+                document.getElementById('deck-inputs').style.display = 'none';
+            } else {
+                document.getElementById('fence-inputs').style.display = 'none';
+                document.getElementById('deck-inputs').style.display = 'block';
+            }
+        }
+
+        function calculate() {
+            // Step 1: Calculate base square footage
+            let baseSqft = 0;
+            
+            if (projectType === 'fence') {
+                const length = parseFloat(document.getElementById('fence-length').value) || 0;
+                const height = parseFloat(document.getElementById('fence-height').value) || 6;
+                const style = parseFloat(document.getElementById('fence-style').value) || 1;
+                const sides = parseFloat(document.getElementById('sides').value) || 1;
+                
+                // Formula: Length × Height × Style Multiplier × Number of Sides
+                baseSqft = length * height * style * sides;
+                
+                // Technical justification:
+                // - Standard privacy fence: 1.0 (100% coverage)
+                // - Board-on-board: 1.15 (15% overlap between boards)
+                // - Shadowbox: 1.1 (10% overlap)
+                // - Picket: 0.85 (15% gaps between pickets)
+                // - Split rail: 0.6 (40% open space)
+                
+            } else {
+                const area = parseFloat(document.getElementById('deck-area').value) || 0;
+                const railings = parseFloat(document.getElementById('railings').value) || 0;
+                
+                // Deck calculation is straightforward area + railings
+                baseSqft = area + railings;
+            }
+            
+            // Step 2: Apply condition multiplier (porosity factor)
+            const condition = parseFloat(document.getElementById('condition').value) || 1;
+            // Technical justification for condition multipliers:
+            // - New wood (0.8): Less porous, sealed surface, absorbs less
+            // - Good (1.0): Standard absorption baseline
+            // - Weathered (1.2): Open grain, 20% more absorption
+            // - Very weathered (1.3): Maximum porosity, 30% more absorption
+            
+            // Step 3: Apply application method multiplier
+            const application = parseFloat(document.getElementById('application').value) || 1;
+            // Technical justification:
+            // - Brush/Roller (1.0): Most efficient, minimal waste
+            // - Spray only (1.1): 10% overspray loss industry standard
+            // - Spray & back-brush (1.05): 5% overspray, more controlled
+            
+            // Step 4: Apply coat multiplier
+            const coats = parseFloat(document.getElementById('coats').value) || 1;
+            // Technical justification for coat multipliers:
+            // - 1 coat: 1.0 (baseline)
+            // - 2 coats standard: 1.6 (second coat uses 60% of first)
+            // - 2 heavy coats: 2.0 (full coverage both times)
+            // This is industry standard - second coat penetrates less
+            
+            // Calculate adjusted square footage
+            const adjustedSqft = baseSqft * condition * application * coats;
+            
+            // Step 5: Get appropriate brand list based on stain type
+            const stainType = document.getElementById('stain-type').value;
+            const brands = brandDatabase[stainType];
+            
+            // Step 6: Calculate average coverage for selected stain type
+            const avgCoverage = brands.reduce((sum, brand) => sum + brand.coverage, 0) / brands.length;
+            // Oil-based average: ~150 sq ft/gal
+            // Water-based average: ~200 sq ft/gal
+            
+            // Step 7: Calculate gallons needed
+            const gallonsExact = adjustedSqft / avgCoverage;
+            const gallonsRounded = Math.round(gallonsExact * 10) / 10; // Round to 1 decimal
+            
+            // Step 8: Calculate purchase amount with safety factor
+            const purchaseGallons = Math.ceil(gallonsExact * 1.1); // 10% safety factor
+            // Industry standard: Always add 10% for touch-ups, waste, and variations
+            
+            // Update summary display
+            document.getElementById('total-sqft').innerHTML = Math.round(baseSqft) + '<span class="summary-unit">sq ft</span>';
+            document.getElementById('gallons-needed').innerHTML = gallonsRounded + '<span class="summary-unit">gal</span>';
+            document.getElementById('purchase-amount').innerHTML = purchaseGallons + '<span class="summary-unit" style="color: rgba(255,255,255,0.9);">gallons</span>';
+            
+            // Generate brand comparison with actual calculations
+            generateBrandTable(adjustedSqft, brands);
+            
+            // Calculate professional installation costs
+            if (projectType === 'fence') {
+                const length = parseFloat(document.getElementById('fence-length').value) || 0;
+                const laborCost = length * 3.50 * 6; // $3.50 per linear foot for 6ft fence
+                
+                // Get lowest material cost from brands
+                const lowestMaterialCost = Math.min(...brands.map(b => 
+                    Math.ceil(adjustedSqft / b.coverage) * b.price
+                ));
+                
+                document.getElementById('diy-cost').innerHTML = `<strong>$${lowestMaterialCost}</strong> (materials only)`;
+                document.getElementById('pro-cost').innerHTML = `<strong>$${Math.round(lowestMaterialCost + laborCost)}</strong> (turnkey with warranty)`;
+            }
+            
+            // Show results
+            document.getElementById('results').classList.add('show');
+            
+            // Smooth scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function generateBrandTable(adjustedSqft, brands) {
+            const tbody = document.getElementById('brand-tbody');
+            tbody.innerHTML = '';
+            
+            // Calculate exact requirements for each brand
+            const calculations = brands.map(brand => {
+                // Each brand has different coverage rates
+                const gallonsExact = adjustedSqft / brand.coverage;
+                const gallonsNeeded = Math.ceil(gallonsExact); // Always round up to full gallons
+                
+                // Calculate total cost
+                const totalCost = gallonsNeeded * brand.price;
+                
+                // Calculate cost per square foot for value comparison
+                const costPerSqft = totalCost / adjustedSqft;
+                
+                return {
+                    ...brand,
+                    gallonsExact,
+                    gallonsNeeded,
+                    totalCost,
+                    costPerSqft
+                };
+            }).sort((a, b) => a.totalCost - b.totalCost); // Sort by total cost
+            
+            // Generate table rows
+            calculations.forEach((brand, index) => {
+                let badge = '';
+                if (brand.recommended) {
+                    badge = '<span class="brand-badge badge-recommended">RECOMMENDED</span>';
+                } else if (index === 0) {
+                    badge = '<span class="brand-badge badge-value">LOWEST PRICE</span>';
+                } else if (brand.value) {
+                    badge = '<span class="brand-badge badge-value">BEST VALUE</span>';
+                } else if (brand.popular) {
+                    badge = '<span class="brand-badge badge-popular">POPULAR</span>';
+                }
+                
+                const stars = '<span class="rating-stars">' + '★'.repeat(brand.rating) + '☆'.repeat(5 - brand.rating) + '</span>';
+                
+                const row = `
+                    <tr>
+                        <td>
+                            <span class="brand-name">${brand.name}</span>${badge}<br>
+                            <small style="color: #666;">${brand.pros}</small>
+                        </td>
+                        <td>${brand.coverage} sq ft/gal</td>
+                        <td>${brand.gallonsNeeded} gallons<br>
+                            <small style="color: #999;">(${brand.gallonsExact.toFixed(1)} exact)</small>
+                        </td>
+                        <td>$${brand.price}/gal</td>
+                        <td class="price-highlight">$${brand.totalCost}<br>
+                            <small style="color: #666;">$${brand.costPerSqft.toFixed(3)}/sq ft</small>
+                        </td>
+                        <td>${stars}<br><small>${brand.availability}</small></td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+            
+            // Generate price comparison bars
+            const priceBars = document.getElementById('price-bars');
+            priceBars.innerHTML = '';
+            
+            const maxPrice = Math.max(...calculations.map(b => b.totalCost));
+            const minPrice = Math.min(...calculations.map(b => b.totalCost));
+            
+            // Show top 3 brands by price
+            calculations.slice(0, 3).forEach(brand => {
+                const percentage = ((brand.totalCost - minPrice) / (maxPrice - minPrice)) * 100;
+                const displayPercentage = 20 + (percentage * 0.8); // Minimum 20% width for visibility
+                
+                const bar = `
+                    <div class="price-bar">
+                        <div class="price-bar-label">${brand.name}</div>
+                        <div class="price-bar-track">
+                            <div class="price-bar-fill" style="width: ${displayPercentage}%">
+                                $${brand.totalCost}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                priceBars.innerHTML += bar;
+            });
+            
+            // Add price summary
+            const savings = maxPrice - minPrice;
+            const avgPrice = calculations.reduce((sum, b) => sum + b.totalCost, 0) / calculations.length;
+            
+            priceBars.innerHTML += `
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e9ecef; font-size: 13px; color: #666;">
+                    <div>Price Range: $${minPrice} - $${maxPrice} (Difference: $${savings})</div>
+                    <div>Average Price: $${Math.round(avgPrice)}</div>
+                </div>
+            `;
+        }
+
+        // Auto-calculate on input change
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('change', function() {
+                if (document.getElementById('results').classList.contains('show')) {
+                    calculate();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

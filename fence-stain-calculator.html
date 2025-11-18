@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fence Stain Calculator - Quick Estimate & Brand Comparison</title>
+    <meta name="description" content="Free fence and deck stain calculator. Get instant estimates for stain gallons needed, compare top brands, and see pricing. Includes professional service options from Ninja Fence Staining in Houston, TX.">
+    <meta name="keywords" content="fence stain calculator, deck stain calculator, stain estimate, fence staining, Houston fence staining, stain cost calculator">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Fence Stain Calculator - Instant Estimates & Brand Comparison">
+    <meta property="og:description" content="Calculate exactly how much stain you need for your fence or deck. Compare top brands and get professional estimates in seconds.">
+    <meta property="og:site_name" content="Ninja Fence Staining">
+
+    <!-- Author & Copyright -->
+    <meta name="author" content="Ninja Fence Staining">
+    <meta name="robots" content="index, follow">
+
     <style>
         * { 
             margin: 0; 
@@ -138,8 +151,14 @@
         }
 
         /* Calculate Button */
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
         .calculate-btn {
-            width: 100%;
+            flex: 1;
             padding: 16px;
             background: #e74c3c; /* Ninja brand red */
             color: white;
@@ -149,13 +168,39 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 30px;
         }
 
         .calculate-btn:hover {
             background: #c0392b;
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+
+        .reset-btn {
+            padding: 16px 30px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .button-container {
+                flex-direction: column;
+            }
+
+            .reset-btn {
+                width: 100%;
+            }
         }
 
         /* Results Section */
@@ -310,26 +355,34 @@
             .calculator-body {
                 padding: 20px;
             }
-            
+
             .input-row {
                 grid-template-columns: 1fr;
             }
-            
+
             .summary-cards {
                 grid-template-columns: 1fr;
             }
-            
+
             .brand-table {
                 font-size: 12px;
             }
-            
+
             .brand-table th,
             .brand-table td {
                 padding: 10px;
             }
-            
+
             .header h1 {
                 font-size: 24px;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .reset-btn {
+                width: 100%;
             }
         }
 
@@ -395,6 +448,47 @@
             font-size: 12px;
             font-weight: 600;
         }
+
+        /* Error Messages */
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .input-error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+        }
+
+        /* Loading State */
+        .calculate-btn.loading {
+            background: #95a5a6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .calculate-btn.loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
     </style>
 </head>
 <body>
@@ -406,25 +500,28 @@
         </div>
 
         <div class="calculator-body">
+            <!-- Error Message -->
+            <div id="error-message" class="error-message"></div>
+
             <!-- Project Type Toggle -->
             <div class="project-toggle">
-                <button class="toggle-btn active" onclick="setProjectType('fence')">Fence</button>
-                <button class="toggle-btn" onclick="setProjectType('deck')">Deck</button>
+                <button class="toggle-btn active" onclick="setProjectType('fence', event)">Fence</button>
+                <button class="toggle-btn" onclick="setProjectType('deck', event)">Deck</button>
             </div>
 
             <!-- Fence Inputs -->
             <div id="fence-inputs">
                 <div class="input-row">
                     <div class="input-group">
-                        <label class="input-label">Fence Length</label>
+                        <label class="input-label" for="fence-length">Fence Length</label>
                         <div class="input-with-unit">
-                            <input type="number" class="input-field" id="fence-length" value="150" placeholder="150">
-                            <span class="unit-label">ft</span>
+                            <input type="number" class="input-field" id="fence-length" value="150" placeholder="e.g., 150" min="1" max="10000" step="1" aria-label="Fence length in feet" aria-describedby="fence-length-unit">
+                            <span class="unit-label" id="fence-length-unit">ft</span>
                         </div>
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Fence Height</label>
-                        <select class="input-field" id="fence-height">
+                        <label class="input-label" for="fence-height">Fence Height</label>
+                        <select class="input-field" id="fence-height" aria-label="Fence height in feet">
                             <option value="4">4 feet</option>
                             <option value="5">5 feet</option>
                             <option value="6" selected>6 feet</option>
@@ -436,8 +533,8 @@
 
                 <div class="input-row">
                     <div class="input-group">
-                        <label class="input-label">Fence Style</label>
-                        <select class="input-field" id="fence-style">
+                        <label class="input-label" for="fence-style">Fence Style</label>
+                        <select class="input-field" id="fence-style" aria-label="Select fence style">
                             <option value="1.0">Standard Privacy</option>
                             <option value="1.15">Board-on-Board</option>
                             <option value="1.1">Shadowbox</option>
@@ -446,8 +543,8 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Sides to Stain</label>
-                        <select class="input-field" id="sides">
+                        <label class="input-label" for="sides">Sides to Stain</label>
+                        <select class="input-field" id="sides" aria-label="Number of sides to stain">
                             <option value="1">One Side</option>
                             <option value="2" selected>Both Sides</option>
                         </select>
@@ -459,15 +556,15 @@
             <div id="deck-inputs" style="display: none;">
                 <div class="input-row">
                     <div class="input-group">
-                        <label class="input-label">Deck Area</label>
+                        <label class="input-label" for="deck-area">Deck Area</label>
                         <div class="input-with-unit">
-                            <input type="number" class="input-field" id="deck-area" value="300" placeholder="300">
-                            <span class="unit-label">sq ft</span>
+                            <input type="number" class="input-field" id="deck-area" value="300" placeholder="e.g., 300" min="1" max="10000" step="1" aria-label="Deck area in square feet" aria-describedby="deck-area-unit">
+                            <span class="unit-label" id="deck-area-unit">sq ft</span>
                         </div>
                     </div>
                     <div class="input-group">
-                        <label class="input-label">Include Railings?</label>
-                        <select class="input-field" id="railings">
+                        <label class="input-label" for="railings">Include Railings?</label>
+                        <select class="input-field" id="railings" aria-label="Select railing size">
                             <option value="0">No Railings</option>
                             <option value="100">Small (+ 100 sq ft)</option>
                             <option value="200" selected>Medium (+ 200 sq ft)</option>
@@ -480,49 +577,54 @@
             <!-- Common Inputs -->
             <div class="input-row">
                 <div class="input-group">
-                    <label class="input-label">Stain Type</label>
-                    <select class="input-field" id="stain-type">
+                    <label class="input-label" for="stain-type">Stain Type</label>
+                    <select class="input-field" id="stain-type" aria-label="Select stain type" aria-describedby="stain-type-info">
                         <option value="oil" selected>Oil-Based (Better Protection)</option>
                         <option value="water">Water-Based (Fast Drying)</option>
                     </select>
-                    <div class="info-text">Oil-based lasts longer, water-based dries faster</div>
+                    <div class="info-text" id="stain-type-info">Oil-based lasts longer, water-based dries faster</div>
                 </div>
                 <div class="input-group">
-                    <label class="input-label">Wood Condition</label>
-                    <select class="input-field" id="condition">
+                    <label class="input-label" for="condition">Wood Condition</label>
+                    <select class="input-field" id="condition" aria-label="Select wood condition" aria-describedby="condition-info">
                         <option value="0.8">New Wood (< 1 year)</option>
                         <option value="1.0" selected>Good (1-3 years)</option>
                         <option value="1.2">Weathered (3-5 years)</option>
                         <option value="1.3">Very Weathered (5+ years)</option>
                     </select>
-                    <div class="info-text">Older wood absorbs more stain</div>
+                    <div class="info-text" id="condition-info">Older wood absorbs more stain</div>
                 </div>
             </div>
 
             <div class="input-row">
                 <div class="input-group">
-                    <label class="input-label">Number of Coats</label>
-                    <select class="input-field" id="coats">
+                    <label class="input-label" for="coats">Number of Coats</label>
+                    <select class="input-field" id="coats" aria-label="Select number of coats" aria-describedby="coats-info">
                         <option value="1">1 Coat (Touch-up)</option>
                         <option value="1.6" selected>2 Coats (Standard)</option>
                         <option value="2">2 Heavy Coats</option>
                     </select>
-                    <div class="info-text">2 coats recommended for best protection</div>
+                    <div class="info-text" id="coats-info">2 coats recommended for best protection</div>
                 </div>
                 <div class="input-group">
-                    <label class="input-label">Application Method</label>
-                    <select class="input-field" id="application">
+                    <label class="input-label" for="application">Application Method</label>
+                    <select class="input-field" id="application" aria-label="Select application method" aria-describedby="application-info">
                         <option value="1.0" selected>Brush/Roller (Standard)</option>
                         <option value="1.1">Spray (Uses 10% more)</option>
                         <option value="1.05">Spray & Back-brush</option>
                     </select>
-                    <div class="info-text">Spraying uses more product but is faster</div>
+                    <div class="info-text" id="application-info">Spraying uses more product but is faster</div>
                 </div>
             </div>
 
-            <button class="calculate-btn" onclick="calculate()">
-                Calculate Stain Needed →
-            </button>
+            <div class="button-container">
+                <button class="calculate-btn" onclick="calculate()" aria-label="Calculate stain needed">
+                    Calculate Stain Needed →
+                </button>
+                <button class="reset-btn" onclick="resetCalculator()" aria-label="Reset calculator to default values">
+                    Reset
+                </button>
+            </div>
 
             <!-- Results Section -->
             <div id="results" class="results-section">
@@ -569,6 +671,14 @@
                             <!-- Populated by JavaScript -->
                         </div>
                     </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div style="margin-top: 30px; padding: 15px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 8px;">
+                    <h4 style="color: #1976D2; margin-bottom: 10px; font-size: 14px; font-weight: 600;">Estimate Accuracy Notice</h4>
+                    <p style="color: #555; font-size: 13px; line-height: 1.6; margin: 0;">
+                        This calculator provides estimates based on industry-standard coverage rates and typical conditions. Actual stain requirements may vary depending on wood type, porosity, weather conditions, application technique, and product formulation. We recommend purchasing 10-15% extra material (already included in recommended purchase amount) to account for variations and future touch-ups. For precise quotes and professional recommendations, please contact Ninja Fence Staining for a free on-site assessment.
+                    </p>
                 </div>
 
                 <!-- Professional Services Section -->
@@ -779,15 +889,17 @@
             ]
         };
 
-        function setProjectType(type) {
+        function setProjectType(type, event) {
             projectType = type;
-            
+
             // Update toggle buttons
             document.querySelectorAll('.toggle-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
-            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
             // Show/hide inputs
             if (type === 'fence') {
                 document.getElementById('fence-inputs').style.display = 'block';
@@ -798,7 +910,119 @@
             }
         }
 
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+
+            // Scroll to error
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.classList.remove('show');
+        }
+
+        function validateInputs() {
+            // Clear previous errors
+            document.querySelectorAll('.input-error').forEach(el => {
+                el.classList.remove('input-error');
+            });
+
+            let errors = [];
+
+            if (projectType === 'fence') {
+                const length = parseFloat(document.getElementById('fence-length').value);
+
+                if (!length || length <= 0) {
+                    errors.push('Fence length must be greater than 0');
+                    document.getElementById('fence-length').classList.add('input-error');
+                }
+                if (length > 10000) {
+                    errors.push('Fence length seems unusually large (max 10,000 ft)');
+                    document.getElementById('fence-length').classList.add('input-error');
+                }
+            } else {
+                const area = parseFloat(document.getElementById('deck-area').value);
+
+                if (!area || area <= 0) {
+                    errors.push('Deck area must be greater than 0');
+                    document.getElementById('deck-area').classList.add('input-error');
+                }
+                if (area > 10000) {
+                    errors.push('Deck area seems unusually large (max 10,000 sq ft)');
+                    document.getElementById('deck-area').classList.add('input-error');
+                }
+            }
+
+            if (errors.length > 0) {
+                showError(errors.join('. '));
+                return false;
+            }
+
+            hideError();
+            return true;
+        }
+
+        function resetCalculator() {
+            // Reset to default values
+            document.getElementById('fence-length').value = '150';
+            document.getElementById('fence-height').value = '6';
+            document.getElementById('fence-style').value = '1.0';
+            document.getElementById('sides').value = '2';
+            document.getElementById('deck-area').value = '300';
+            document.getElementById('railings').value = '200';
+            document.getElementById('stain-type').value = 'oil';
+            document.getElementById('condition').value = '1.0';
+            document.getElementById('coats').value = '1.6';
+            document.getElementById('application').value = '1.0';
+
+            // Hide results
+            document.getElementById('results').classList.remove('show');
+
+            // Clear errors
+            hideError();
+            document.querySelectorAll('.input-error').forEach(el => {
+                el.classList.remove('input-error');
+            });
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function calculate() {
+            // Validate inputs first
+            if (!validateInputs()) {
+                return;
+            }
+
+            // Show loading state
+            const calcBtn = document.querySelector('.calculate-btn');
+            calcBtn.classList.add('loading');
+            calcBtn.textContent = 'Calculating';
+
+            // Simulate brief calculation delay for UX
+            setTimeout(() => {
+                try {
+                    performCalculation();
+                } catch (error) {
+                    showError('An error occurred during calculation. Please check your inputs and try again.');
+                    console.error('Calculation error:', error);
+                } finally {
+                    // Remove loading state
+                    calcBtn.classList.remove('loading');
+                    calcBtn.textContent = 'Calculate Stain Needed →';
+                }
+            }, 300);
+        }
+
+        function performCalculation() {
             // Step 1: Calculate base square footage
             let baseSqft = 0;
             
@@ -893,7 +1117,7 @@
             
             // Show results
             document.getElementById('results').classList.add('show');
-            
+
             // Smooth scroll to results
             document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
